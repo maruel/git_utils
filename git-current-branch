@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+# Copyright (c) 2012 Marc-Antoine Ruel. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+"""Prints the current branch name.
+
+Doesn't print any error if HEAD is not a branch tip.
+"""
+
+import sys
+
+import find_depot_tools
+
+import subprocess2
+
+try:
+  output = subprocess2.check_output(
+      ['git', 'symbolic-ref', '-q', 'HEAD'],
+      stderr=subprocess2.VOID)
+  prefix = 'refs/heads/'
+  if not output.startswith(prefix):
+    sys.exit(1)
+  sys.stdout.write(output[len(prefix):])
+  sys.stdout.flush()
+except subprocess2.CalledProcessError, e:
+  sys.exit(e.returncode)
