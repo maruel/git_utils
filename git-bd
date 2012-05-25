@@ -9,4 +9,4 @@ import sys
 
 import git_wrapper_tool
 
-git_wrapper_tool.exec_command(['git', 'branch', -D'] + sys.argv[1:])
+git_wrapper_tool.exec_command(['git', 'branch', '-D'] + sys.argv[1:])
