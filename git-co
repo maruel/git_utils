@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+# Copyright (c) 2012 Marc-Antoine Ruel. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+"""Shortcut for git checkout."""
+
+import sys
+
+import git_wrapper_tool
+
+git_wrapper_tool.exec_command(['git', 'checkout'] + sys.argv[1:])

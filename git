@@ -1,0 +1,8 @@
+#!/bin/sh
+# Copyright (c) 2012 Marc-Antoine Ruel. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+#
+# Shortcut for git_wrapper_tool.py.
+BASE=$(dirname $(readlink -f $0))
+exec python $BASE/git_wrapper_tool.py "$@"
