@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+# Copyright 2012 Marc-Antoine Ruel. Licensed under the Apache License, Version
+# 2.0 (the "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0. Unless required by applicable law
+# or agreed to in writing, software distributed under the License is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific language governing
+# permissions and limitations under the License.
+
+import os
+import subprocess
+import sys
+
+
+def main():
+  # Get the list of .go files to check.
+  if subprocess.call(
+    ['git', 'rev-parse', 'HEAD'], stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE):
+    files = [
+      f for f in subprocess.check_output(
+          ['git', 'diff', '--cache', '--name-only']).splitlines()
+      if f.endswith('.go')
+    ]
+  else:
+    files = [
+      f for f in subprocess.check_output(['git', 'ls-files', '-c']).splitlines()
+      if f.endswith('.go')
+    ]
+
+  # Get the list of files that need to be reformatted.
+  bad = []
+  for f in files:
+    content = subprocess.check_output(['git', '--no-pager', 'show', ':' + f])
+    p = subprocess.Popen(
+        ['gofmt', '-l'],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT)
+    out, _ = p.communicate(content)
+    if out != '':
+      bad.append(f)
+  if bad:
+    print('gofmt -w %s' % ' '.join(bad))
+    return 1
+
+  # Now go test. The trick is to git stash so untracked files and changes not
+  # in the index are temporarily removed while go test is running.
+  subprocess.check_call(
+      ['git', 'stash', 'save', '--keep-index', '--include-untracked', '--quiet'])
+  try:
+    result = subprocess.call(['go', 'test'])
+  finally:
+    subprocess.check_call(['git', 'stash', 'pop', '--quiet'])
+  return result
+
+
+if __name__ == '__main__':
+  sys.exit(main())
+
+# vi: set ts=4 sts=2 sw=2 et syntax=python:
